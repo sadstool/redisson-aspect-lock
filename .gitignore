@@ -1,0 +1,10 @@
+/build
+gradle.properties.local
+
+# gradle specific
+.gradle
+!gradle-wrapper.jar
+
+# IntelliJ IDEA specific
+.idea
+*.iml
