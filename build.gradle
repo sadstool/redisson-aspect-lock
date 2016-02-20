@@ -22,8 +22,7 @@ repositories {
 }
 
 dependencies {
-	provided 'org.springframework.boot:spring-boot-starter:1.3.2.RELEASE',
-		'org.springframework.boot:spring-boot-starter-aop:1.3.2.RELEASE'
+	provided 'org.springframework.boot:spring-boot-starter-aop:1.3.2.RELEASE'
 
 	compile 'org.redisson:redisson:2.2.8'
 }
