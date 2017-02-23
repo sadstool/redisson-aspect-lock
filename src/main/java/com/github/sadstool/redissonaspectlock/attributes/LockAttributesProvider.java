@@ -3,36 +3,54 @@ package com.github.sadstool.redissonaspectlock.attributes;
 import com.github.sadstool.redissonaspectlock.annotation.Lockable;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.LockConfiguration;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.LockConfigurationProvider;
+import com.github.sadstool.redissonaspectlock.attributes.key.LockKeyProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LockAttributesProvider {
 
-    public static final String LOCK_PATH_PREFIX = "lock.";
+    public static final String LOCK_PATH_PREFIX = "lock";
+    public static final String LOCK_PATH_SEPARATOR = ".";
 
-    private LockKeysProvider keyProvider;
+    private LockKeyProvider keyProvider;
     private LockConfigurationProvider configurationProvider;
 
-    public LockAttributesProvider(LockKeysProvider keyProvider, LockConfigurationProvider configurationProvider) {
+    public LockAttributesProvider(LockKeyProvider keyProvider, LockConfigurationProvider configurationProvider) {
         this.keyProvider = keyProvider;
         this.configurationProvider = configurationProvider;
     }
 
-    public LockAttributes get(ProceedingJoinPoint joinPoint) {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        Lockable lockAnnotation = methodSignature.getMethod().getAnnotation(Lockable.class);
+    public List<LockAttributes> get(ProceedingJoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        Lockable annotation = method.getAnnotation(Lockable.class);
+        Object[] arguments = joinPoint.getArgs();
 
-        String name = getName(lockAnnotation.value(), methodSignature);
-        LockConfiguration lockConfiguration = configurationProvider.getConfiguration(name);
-        long waitTime = getWaitTime(lockConfiguration, lockAnnotation);
-        long leaseTime = getLeaseTime(lockConfiguration, lockAnnotation);
+        String name = getName(annotation.value(), signature);
+        LockConfiguration configuration = configurationProvider.getConfiguration(name);
+        long waitTime = getWaitTime(configuration, annotation);
+        long leaseTime = getLeaseTime(configuration, annotation);
+        List<List<String>> keyCollections = getKeyCollections(method, annotation, arguments);
 
-        List<String> keys = keyProvider.get(methodSignature.getMethod().getParameters(), joinPoint.getArgs());
-        String path = getPath(name, keys);
+        return keyCollections.stream()
+                .map(keys -> new LockAttributes(name, getPath(name, keys), waitTime, leaseTime, keys))
+                .collect(Collectors.toList());
+    }
 
-        return new LockAttributes(name, path, waitTime, leaseTime, keys);
+    private List<List<String>> getKeyCollections(Method method, Lockable annotation, Object[] arguments) {
+        if (annotation.key().length == 0) {
+            return Collections.singletonList(keyProvider.get(null, method, arguments));
+        } else {
+            return Stream.of(annotation.key())
+                    .map(keyDefinition -> keyProvider.get(keyDefinition, method, arguments))
+                    .collect(Collectors.toList());
+        }
     }
 
     private String getName(String annotationName, MethodSignature signature) {
@@ -54,11 +72,7 @@ public class LockAttributesProvider {
     }
 
     private String getPath(String name, List<String> keys) {
-        StringBuilder stringBuilder = new StringBuilder(LOCK_PATH_PREFIX).append(name);
-        for (String key : keys) {
-            stringBuilder.append('.').append(key);
-        }
-
-        return stringBuilder.toString();
+        return Stream.concat(Stream.of(LOCK_PATH_PREFIX, name), keys.stream())
+                .collect(Collectors.joining(LOCK_PATH_SEPARATOR));
     }
 }

@@ -1,4 +1,4 @@
-package com.github.sadstool.redissonaspectlock.attributes;
+package com.github.sadstool.redissonaspectlock.attributes.key;
 
 import com.github.sadstool.redissonaspectlock.annotation.LockKey;
 import org.springframework.expression.ExpressionParser;
@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LockKeysProvider {
+public class LockKeyComponentsProvider {
 
     private ExpressionParser parser;
 
-    public LockKeysProvider() {
+    public LockKeyComponentsProvider() {
         this.parser = new SpelExpressionParser();
     }
 

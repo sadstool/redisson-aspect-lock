@@ -16,6 +16,12 @@ public @interface Lockable {
     String value() default "";
 
     /**
+     * Lock keys
+     * @return lock name
+     */
+    String[] key() default {};
+
+    /**
      * The maximum time (millis) to acquire the lock
      * @return maximum wait time
      */

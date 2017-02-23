@@ -7,7 +7,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-	compile('com.github.sadstool:redisson-aspect-lock:0.1.1')
+	compile('com.github.sadstool:redisson-aspect-lock:0.1.2')
 	compile('org.springframework.boot:spring-boot-starter-aop')
 }
 ```
@@ -39,7 +39,7 @@ RedissonClient bean will be registered with standard spring `spring.redis` prope
     }
 ```
 
-### Lock by name and keys
+### Lock by name and key components
 
 ```java
     @Lockable("name")
@@ -57,8 +57,17 @@ RedissonClient bean will be registered with standard spring `spring.redis` prope
         ...
     }
 
-    @Lockable
-    public void importantFeature(@LockKey("field1 + '.' + field2") Entity entity) {
+    @Lockable(key = "#entity.field1 + '.' + #entity.field2")
+    public void importantFeature(Entity entity) {
+        ...
+    }
+```
+
+### Multiple locks by keys with SpEL
+
+```java
+    @Lockable(key = {"#groupId", "#userId"})
+    public void importantFeature(String groupId, String userId) {
         ...
     }
 ```

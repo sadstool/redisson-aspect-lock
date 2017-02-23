@@ -2,11 +2,13 @@ package com.github.sadstool.redissonaspectlock.config;
 
 import com.github.sadstool.redissonaspectlock.LockManager;
 import com.github.sadstool.redissonaspectlock.attributes.LockAttributesProvider;
-import com.github.sadstool.redissonaspectlock.attributes.LockKeysProvider;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.DefaultConfigurationProvider;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.LockConfigurationProvider;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.custom.ConfigurationCollectorFactory;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.custom.CustomConfigurationProvider;
+import com.github.sadstool.redissonaspectlock.attributes.key.LockKeyComponentsProvider;
+import com.github.sadstool.redissonaspectlock.attributes.key.LockKeyProvider;
+import com.github.sadstool.redissonaspectlock.attributes.key.SpelLockKeyProvider;
 import com.github.sadstool.redissonaspectlock.config.properties.LockProperties;
 import com.github.sadstool.redissonaspectlock.error.LockExceptionFactory;
 import com.github.sadstool.redissonaspectlock.lock.LockFactory;
@@ -21,8 +23,18 @@ import org.springframework.context.annotation.Import;
 public class RedissonAspectLockAutoConfiguration {
 
     @Bean
-    public LockKeysProvider lockKeysProvider() {
-        return new LockKeysProvider();
+    public SpelLockKeyProvider spelLockKeyProvider() {
+        return new SpelLockKeyProvider();
+    }
+
+    @Bean
+    public LockKeyComponentsProvider lockKeyComponentsProvider() {
+        return new LockKeyComponentsProvider();
+    }
+
+    @Bean
+    public LockKeyProvider lockKeyGenerator(SpelLockKeyProvider spelLockKeyProvider, LockKeyComponentsProvider lockKeyComponentsProvider) {
+        return new LockKeyProvider(spelLockKeyProvider, lockKeyComponentsProvider);
     }
 
     @Bean
@@ -52,9 +64,9 @@ public class RedissonAspectLockAutoConfiguration {
     }
 
     @Bean
-    public LockAttributesProvider lockAttributesProvider(LockKeysProvider lockKeysProvider,
+    public LockAttributesProvider lockAttributesProvider(LockKeyProvider lockKeyProvider,
                                                          LockConfigurationProvider lockConfigurationProvider) {
-        return new LockAttributesProvider(lockKeysProvider, lockConfigurationProvider);
+        return new LockAttributesProvider(lockKeyProvider, lockConfigurationProvider);
     }
 
     @Bean
