@@ -1,6 +1,6 @@
 package com.github.sadstool.redissonaspectlock.lock;
 
-import org.redisson.core.RLock;
+import org.redisson.api.RLock;
 
 import java.util.concurrent.TimeUnit;
 

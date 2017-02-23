@@ -1,8 +1,8 @@
 package com.github.sadstool.redissonaspectlock.lock;
 
 import com.github.sadstool.redissonaspectlock.attributes.LockAttributes;
-import org.redisson.RedissonClient;
-import org.redisson.core.RLock;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

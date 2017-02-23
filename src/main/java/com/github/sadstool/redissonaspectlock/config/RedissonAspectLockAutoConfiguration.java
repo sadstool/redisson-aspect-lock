@@ -12,7 +12,7 @@ import com.github.sadstool.redissonaspectlock.attributes.key.SpelLockKeyProvider
 import com.github.sadstool.redissonaspectlock.config.properties.LockProperties;
 import com.github.sadstool.redissonaspectlock.error.LockExceptionFactory;
 import com.github.sadstool.redissonaspectlock.lock.LockFactory;
-import org.redisson.RedissonClient;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

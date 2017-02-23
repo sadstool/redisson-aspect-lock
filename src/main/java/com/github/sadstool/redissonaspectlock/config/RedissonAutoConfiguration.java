@@ -1,9 +1,9 @@
 package com.github.sadstool.redissonaspectlock.config;
 
-import org.redisson.Config;
 import org.redisson.Redisson;
-import org.redisson.RedissonClient;
-import org.redisson.SingleServerConfig;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
