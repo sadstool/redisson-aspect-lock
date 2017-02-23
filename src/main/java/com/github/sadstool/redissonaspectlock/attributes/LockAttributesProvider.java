@@ -4,6 +4,7 @@ import com.github.sadstool.redissonaspectlock.annotation.Lockable;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.LockConfiguration;
 import com.github.sadstool.redissonaspectlock.attributes.configuration.LockConfigurationProvider;
 import com.github.sadstool.redissonaspectlock.attributes.key.LockKeyProvider;
+import com.github.sadstool.redissonaspectlock.error.LockException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
@@ -28,7 +29,8 @@ public class LockAttributesProvider {
 
     public List<LockAttributes> get(ProceedingJoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
+        Method method = getMethod(joinPoint, signature);
+
         Lockable annotation = method.getAnnotation(Lockable.class);
         Object[] arguments = joinPoint.getArgs();
 
@@ -41,6 +43,21 @@ public class LockAttributesProvider {
         return keyCollections.stream()
                 .map(keys -> new LockAttributes(name, getPath(name, keys), waitTime, leaseTime, keys))
                 .collect(Collectors.toList());
+    }
+
+    private Method getMethod(ProceedingJoinPoint joinPoint, MethodSignature signature) {
+        Method method = signature.getMethod();
+
+        if (method.getDeclaringClass().isInterface()) {
+            try {
+                method = joinPoint.getTarget().getClass().getDeclaredMethod(signature.getName(),
+                        method.getParameterTypes());
+            } catch (SecurityException | NoSuchMethodException e) {
+                throw new LockException("Unable to get target method");
+            }
+        }
+
+        return method;
     }
 
     private List<List<String>> getKeyCollections(Method method, Lockable annotation, Object[] arguments) {
